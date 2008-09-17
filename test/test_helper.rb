@@ -1,8 +1,11 @@
 # rails
 require "rubygems"
-gem "rails", "2.1.0"
+gem "rails", ENV['RAILS_VERSION'] || "> 0"
+require "rails/version"
+puts "==== Testing with Rails #{Rails::VERSION::STRING} ===="
 require "active_record"
 require "action_controller"
+require "action_view"
 require "action_controller/test_process"
 
 # xss_killer
@@ -19,14 +22,17 @@ end
 
 # test setup
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
-ActiveRecord::Schema.define :version => 1 do
-  create_table "foos" do |t|
-    t.string "attr_to_kill_xss"
-    t.string "attr_to_allow_injection"
-    t.string "attr_to_sanitize"
-    t.integer "attr_integer"
-    t.datetime "attr_datetime"
-    t.integer "other_foo_id"
+silence_stream(STDOUT) do
+  ActiveRecord::Schema.define :version => 1 do
+    create_table "foos" do |t|
+      t.string "attr_to_kill_xss"
+      t.string "attr_to_allow_injection"
+      t.string "attr_to_sanitize"
+      t.integer "attr_integer"
+      t.datetime "attr_datetime"
+      t.integer "other_foo_id"
+      t.text "attr_text"
+    end
   end
 end
 

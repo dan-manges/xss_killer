@@ -43,16 +43,17 @@ module XssKiller
         self.class.define_attribute_methods
       end
       mod = Module.new
-      self.class.column_names.each do |method|
+      self.class.columns.each do |column|
+        next unless [:string, :text].include?(column.type)
         mod.module_eval <<-END, __FILE__, __LINE__
-          def #{method}(kill_xss = true)
+          def #{column.name}(kill_xss = true)
             value = super()
             if value.is_a?(String) && kill_xss
               if self.class.xss_killer_options[:allow_injection] &&
-                   self.class.xss_killer_options[:allow_injection].map(&:to_s).include?(#{method.to_s.inspect})
+                   self.class.xss_killer_options[:allow_injection].map(&:to_s).include?(#{column.name.to_s.inspect})
                 value
               elsif self.class.xss_killer_options[:sanitize] &&
-                self.class.xss_killer_options[:sanitize].map(&:to_s).include?(#{method.to_s.inspect})
+                self.class.xss_killer_options[:sanitize].map(&:to_s).include?(#{column.name.to_s.inspect})
                 sanitized = @template.sanitize value
                 formatted = @template.simple_format sanitized
               else
