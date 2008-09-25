@@ -9,6 +9,13 @@ class ActiveRecordExtensionTest < Test::Unit::TestCase
     end
   end
   
+  test "models not annotated with kills_xss to do not escape html" do
+    bar = Bar.new :name => "<js>"
+    XssKiller.rendering :html, ActionView::Base.new do
+      assert_equal "<js>", bar.name
+    end
+  end
+  
   test "using sanitize" do
     link = "<p><a href=\"http://www.google.com\">google</a></p>"
     foo = Foo.new :attr_to_sanitize => "<a href='http://www.google.com'>google</a>"

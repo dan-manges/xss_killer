@@ -29,14 +29,14 @@ class FoosController < ActionController::Base
   def foos
     foo = Foo.create!(:attr_to_kill_xss => params[:attr_to_kill_xss])
     @foos = Foo.find(:all, :conditions => {:id => foo.id})
-    render :nothing => true
+    render :inline => "<%= @foos[0].attr_to_kill_xss %>"
   end
   
   def xss_using_respond_to_block
     foo = Foo.create! :attr_to_kill_xss => params[:attr_to_kill_xss]
     @foo = Foo.find(foo.id)
     respond_to do |format|
-      format.html { render :inline => "<%= debug @foo %>"}
+      format.html { render :inline => "<%= @foo.attr_to_kill_xss %>"}
       format.xml { render :xml => @foo.to_xml }
     end
   end

@@ -11,7 +11,7 @@ class ActionControllerExtensionTest < Test::Unit::TestCase
   test "escapes html if format is html" do
     @request.env["HTTP_ACCEPT"] = "text/html"
     get :xss_using_respond_to_block, :attr_to_kill_xss => "<dan>"
-    assert_equal "&lt;dan&gt;", assigns(:foo).attr_to_kill_xss
+    assert_equal "&lt;dan&gt;", @response.body
   end
   
   test "does not escacpe html if format is xml" do
@@ -22,7 +22,7 @@ class ActionControllerExtensionTest < Test::Unit::TestCase
   
   test "escapes html if using implicit html template" do
     get :implicit_html_render, :attr_to_kill_xss => "<dan>"
-    assert_equal "&lt;dan&gt;", assigns(:foo).attr_to_kill_xss
+    assert_equal "<div>&lt;dan&gt;</div>\n", @response.body
   end
   
   test "does not escape html if format is implicit xml" do
@@ -33,7 +33,7 @@ class ActionControllerExtensionTest < Test::Unit::TestCase
   
   test "records in an array get html escaped" do
     get :foos, :attr_to_kill_xss => "<dan>"
-    assert_equal "&lt;dan&gt;", assigns(:foos)[0].attr_to_kill_xss
+    assert_equal "&lt;dan&gt;", @response.body
   end
   
   test "records loaded after render is called get escaped" do

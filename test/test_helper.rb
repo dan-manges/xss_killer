@@ -33,6 +33,9 @@ silence_stream(STDOUT) do
       t.integer "other_foo_id"
       t.text "attr_text"
     end
+    create_table "bars" do |t|
+      t.string "name"
+    end
   end
 end
 
@@ -41,6 +44,9 @@ ActionController::Base.view_paths = ["#{File.dirname(__FILE__)}/views"]
 
 class Foo < ActiveRecord::Base
   belongs_to :other_foo, :class_name => "Foo", :foreign_key => "other_foo_id"
-  kill_xss :allow_injection => ["attr_to_allow_injection"],
+  kills_xss :allow_injection => ["attr_to_allow_injection"],
            :sanitize => ["attr_to_sanitize"]
+end
+
+class Bar < ActiveRecord::Base
 end
