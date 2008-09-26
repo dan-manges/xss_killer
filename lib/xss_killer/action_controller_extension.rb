@@ -18,11 +18,9 @@ module XssKiller
       if options # explicit render
         mime_type = response.content_type ? Mime::Type.lookup(response.content_type.to_s).to_sym : Mime::HTML.to_sym  
       else # implicit render
-        if Rails::VERSION::MAJOR == 2 && Rails::VERSION::MINOR == 1
-          handler = ActionView::Template.new(@template, default_template_name, true).handler.class
-        elsif Rails::VERSION::MAJOR == 2 && Rails::VERSION::MINOR == 0
-          ext = @template.send :find_template_extension_for, default_template_name
-          handler = ActionView::Base.handler_for_extension(ext)
+        handler_method = "handler_for_rails_#{Rails::VERSION::MAJOR}_#{Rails::VERSION::MINOR}"
+        if respond_to?(handler_method)
+          handler = send(handler_method)
         else
           raise "Rails #{Rails::VERSION::STRING} is not supported"
         end
@@ -32,6 +30,15 @@ module XssKiller
       XssKiller.rendering mime_type, @template do
         render_without_xss_killer options, extra_options, &block
       end
+    end
+    
+    def handler_for_rails_2_1
+      ActionView::Template.new(@template, default_template_name, true).handler.class
+    end
+    
+    def handler_for_rails_2_0
+      ext = @template.send :find_template_extension_for, default_template_name
+      ActionView::Base.handler_for_extension(ext)
     end
   end
 end

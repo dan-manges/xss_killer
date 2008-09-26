@@ -10,18 +10,13 @@ module XssKiller
       def define_read_method_with_xss_killing(symbol, attr_name, column)
         define_read_method_without_xss_killing symbol, attr_name, column
         if column.type == :string || column.type == :text
-          alias_method "#{attr_name}_without_xss_killing", attr_name
           class_eval <<-END, __FILE__, __LINE__
             def #{attr_name}_with_xss_killing
               value = #{attr_name}_without_xss_killing
-              if respond_to?(:kill_xss)
-                kill_xss #{column.name.inspect}, value
-              else
-                value
-              end
+              kill_xss #{column.name.inspect}, value
             end
           END
-          alias_method attr_name, "#{attr_name}_with_xss_killing"
+          alias_method_chain attr_name, "xss_killing"
         end
       end
     end

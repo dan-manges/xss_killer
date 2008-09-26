@@ -9,7 +9,6 @@ ActiveRecord::AttributeMethods.send :include, XssKiller::AttributeMethodsExtensi
 ActionController::Base.send :include, XssKiller::ActionControllerExtension
 
 module XssKiller
-  @records_to_escape = []
   @rendering = false
 
   def self.render_format
@@ -20,13 +19,14 @@ module XssKiller
     @rendering
   end
   
+  def self.rendering_html?
+    @rendering && @render_format == :html
+  end
+  
   def self.rendering(format, template, &block)
     @template = template
     @render_format = format
     @rendering = true
-    while record = @records_to_escape.shift
-      record.kill_xss(template) if format == :html
-    end
     yield
   ensure
     @render_format = nil
