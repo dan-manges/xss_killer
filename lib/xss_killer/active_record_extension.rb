@@ -2,20 +2,20 @@ module XssKiller
   module ActiveRecordExtension
     module ClassMethods
       def kills_xss(options = {})
-        @xss_killer_options = options
-        @xss_killer_options[:allow_injection] ||= []
-        @xss_killer_options[:allow_injection].map!(&:to_s)
-        @xss_killer_options[:sanitize] ||= []
-        @xss_killer_options[:sanitize].map!(&:to_s)
-        @kill_xss = true
+        options[:allow_injection] ||= []
+        options[:allow_injection].map!(&:to_s)
+        options[:sanitize] ||= []
+        options[:sanitize].map!(&:to_s)
+        write_inheritable_attribute :xss_killer_options, options
+        write_inheritable_attribute :kill_xss, true
       end
       
       def kill_xss?
-        @kill_xss
+        read_inheritable_attribute :kill_xss
       end
 
       def xss_killer_options
-        @xss_killer_options || {}
+        read_inheritable_attribute :xss_killer_options
       end
     end
 

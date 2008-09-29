@@ -48,5 +48,13 @@ class Foo < ActiveRecord::Base
            :sanitize => ["attr_to_sanitize"]
 end
 
+class SubFoo < Foo
+  set_table_name "foos"
+end
+
 class Bar < ActiveRecord::Base
+end
+
+class SubBar < Bar
+  kills_xss
 end
