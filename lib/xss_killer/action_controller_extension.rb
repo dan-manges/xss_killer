@@ -8,22 +8,28 @@ module XssKiller
     
     module ImplicitRender
       def mime_type
-        handler_method = "handler_for_rails_#{Rails::VERSION::MAJOR}_#{Rails::VERSION::MINOR}"
-        if respond_to?(handler_method)
-          handler = send(handler_method)
+        mime_type_method = "mime_type_for_rails_#{Rails::VERSION::MAJOR}_#{Rails::VERSION::MINOR}"
+        if respond_to?(mime_type_method)
+          send(mime_type_method)
         else
           raise "Rails #{Rails::VERSION::STRING} is not supported"
         end
+      end
+      
+      def mime_type_for_rails_2_2
+        template = @template.send(:_pick_template, default_template_name)
+        template.mime_type || ActionControllerExtension.mime_type_for_handler(template.handler) || raise("TODO: decide what to do")
+      end
+
+      def mime_type_for_rails_2_1
+        handler = ActionView::Template.new(@template, default_template_name, true).handler.class
         ActionControllerExtension.mime_type_for_handler(handler) || raise("TODO: decide what to do")
       end
 
-      def handler_for_rails_2_1
-        ActionView::Template.new(@template, default_template_name, true).handler.class
-      end
-
-      def handler_for_rails_2_0
+      def mime_type_for_rails_2_0
         ext = @template.send :find_template_extension_for, default_template_name
-        ActionView::Base.handler_for_extension(ext)
+        handler = ActionView::Base.handler_for_extension(ext)
+        ActionControllerExtension.mime_type_for_handler(handler) || raise("TODO: decide what to do")
       end
     end
     
